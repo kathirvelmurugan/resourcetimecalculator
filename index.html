@@ -18,6 +18,42 @@
         .person {
             margin-bottom: 15px;
         }
+
+        label {
+            display: block;
+            font-weight: bold;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="checkbox"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        h4 {
+            margin-top: 0;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -25,10 +61,10 @@
         <h2>CCTV Work Time and Cost Calculator</h2>
         <form id="workTimeForm">
             <label for="numPersons">Number of Personnel (1-8):</label>
-            <input type="number" id="numPersons" name="numPersons" min="1" max="8" required><br><br>
+            <input type="number" id="numPersons" name="numPersons" min="1" max="8" required>
 
             <label for="baseMinutes">Base Minutes:</label>
-            <input type="number" id="baseMinutes" name="baseMinutes" min="0"><br><br>
+            <input type="number" id="baseMinutes" name="baseMinutes" min="0">
 
             <h3>Personnel Details</h3>
             <div id="personnelDetails"></div>
@@ -36,6 +72,7 @@
             <button type="button" onclick="addPerson()">Add Personnel</button>
             <button type="submit">Calculate Work Time and Cost</button>
         </form>
+        <div id="totalMinutes"></div>
         <div id="totalCost"></div>
     </div>
 
@@ -52,13 +89,13 @@
                 personDiv.innerHTML = `
                     <h4>Person ${i}</h4>
                     <label for="personName${i}">Name:</label>
-                    <input type="text" id="personName${i}" name="personName${i}" required><br>
+                    <input type="text" id="personName${i}" name="personName${i}" required>
 
                     <label for="timeIn${i}">Time In (hh:mm):</label>
-                    <input type="text" id="timeIn${i}" name="timeIn${i}" required><br>
+                    <input type="text" id="timeIn${i}" name="timeIn${i}" required>
 
                     <label for="timeOut${i}">Time Out (hh:mm):</label>
-                    <input type="text" id="timeOut${i}" name="timeOut${i}" required><br>
+                    <input type="text" id="timeOut${i}" name="timeOut${i}" required>
 
                     <label for="excludeBaseMinutes${i}">Exclude Base Minutes:</label>
                     <input type="checkbox" id="excludeBaseMinutes${i}" name="excludeBaseMinutes${i}" value="true"><br><br>
@@ -79,6 +116,7 @@
             const numPersons = document.getElementById("numPersons").value;
             const baseMinutes = parseInt(document.getElementById("baseMinutes").value) || 0;
             let totalCost = 0;
+            let totalMinutes = 0; // Initialize totalMinutes variable
 
             for (let i = 1; i <= numPersons; i++) {
                 const timeIn = document.getElementById(`timeIn${i}`).value;
@@ -93,15 +131,19 @@
                 const [inHours, inMinutes] = timeIn.split(':').map(Number);
                 const [outHours, outMinutes] = timeOut.split(':').map(Number);
 
-                let totalMinutes = (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes);
+                let personTotalMinutes = (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes);
 
                 if (!excludeBaseMinutes) {
-                    totalMinutes += baseMinutes;
+                    personTotalMinutes += baseMinutes;
                 }
 
-                const cost = totalMinutes * 6; // Rs. 6 per minute
+                const cost = personTotalMinutes * 6; // Rs. 6 per minute
                 totalCost += cost;
+                totalMinutes += personTotalMinutes; // Add to total minutes
             }
+
+            const totalMinutesDiv = document.getElementById("totalMinutes");
+            totalMinutesDiv.innerHTML = `<h3>Total Minutes: ${totalMinutes} minutes</h3>`; // Display total minutes
 
             const totalCostDiv = document.getElementById("totalCost");
             totalCostDiv.innerHTML = `<h3>Total Cost: Rs. ${totalCost}</h3>`;
