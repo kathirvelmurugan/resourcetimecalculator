@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CCTV Work Time and Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .person {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>CCTV Work Time and Cost Calculator</h2>
+        <form id="workTimeForm">
+            <label for="numPersons">Number of Personnel (1-8):</label>
+            <input type="number" id="numPersons" name="numPersons" min="1" max="8" required><br><br>
+
+            <label for="baseMinutes">Base Minutes:</label>
+            <input type="number" id="baseMinutes" name="baseMinutes" min="0"><br><br>
+
+            <h3>Personnel Details</h3>
+            <div id="personnelDetails"></div>
+
+            <button type="button" onclick="addPerson()">Add Personnel</button>
+            <button type="submit">Calculate Work Time and Cost</button>
+        </form>
+        <div id="totalCost"></div>
+    </div>
+
+    <script>
+        function addPerson() {
+            const numPersons = document.getElementById("numPersons").value;
+            const personnelDetailsDiv = document.getElementById("personnelDetails");
+            personnelDetailsDiv.innerHTML = "";
+
+            for (let i = 1; i <= numPersons; i++) {
+                const personDiv = document.createElement("div");
+                personDiv.classList.add("person");
+
+                personDiv.innerHTML = `
+                    <h4>Person ${i}</h4>
+                    <label for="personName${i}">Name:</label>
+                    <input type="text" id="personName${i}" name="personName${i}" required><br>
+
+                    <label for="timeIn${i}">Time In (hh:mm):</label>
+                    <input type="text" id="timeIn${i}" name="timeIn${i}" required><br>
+
+                    <label for="timeOut${i}">Time Out (hh:mm):</label>
+                    <input type="text" id="timeOut${i}" name="timeOut${i}" required><br>
+
+                    <label for="excludeBaseMinutes${i}">Exclude Base Minutes:</label>
+                    <input type="checkbox" id="excludeBaseMinutes${i}" name="excludeBaseMinutes${i}" value="true"><br><br>
+                `;
+
+                personnelDetailsDiv.appendChild(personDiv);
+            }
+        }
+
+        function validateTimeFormat(timeInput) {
+            const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+            return timePattern.test(timeInput);
+        }
+
+        document.getElementById("workTimeForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const numPersons = document.getElementById("numPersons").value;
+            const baseMinutes = parseInt(document.getElementById("baseMinutes").value) || 0;
+            let totalCost = 0;
+
+            for (let i = 1; i <= numPersons; i++) {
+                const timeIn = document.getElementById(`timeIn${i}`).value;
+                const timeOut = document.getElementById(`timeOut${i}`).value;
+                const excludeBaseMinutes = document.getElementById(`excludeBaseMinutes${i}`).checked;
+
+                if (!validateTimeFormat(timeIn) || !validateTimeFormat(timeOut)) {
+                    alert(`Invalid time format for Person ${i}. Please use hh:mm format.`);
+                    return;
+                }
+
+                const [inHours, inMinutes] = timeIn.split(':').map(Number);
+                const [outHours, outMinutes] = timeOut.split(':').map(Number);
+
+                let totalMinutes = (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes);
+
+                if (!excludeBaseMinutes) {
+                    totalMinutes += baseMinutes;
+                }
+
+                const cost = totalMinutes * 6; // Rs. 6 per minute
+                totalCost += cost;
+            }
+
+            const totalCostDiv = document.getElementById("totalCost");
+            totalCostDiv.innerHTML = `<h3>Total Cost: Rs. ${totalCost}</h3>`;
+        });
+    </script>
+</body>
+</html>
